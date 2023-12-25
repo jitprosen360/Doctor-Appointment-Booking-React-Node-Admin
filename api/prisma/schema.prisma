@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Auth {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  userId   String?
+  role     UserRole
+
+  @@map("Auth")
+}
+
+model Patient {
+  id           String         @id @default(uuid())
+  firstName    String
+  lastName     String
+  dateOfBirth  DateTime?
+  bloodGroup   String?
+  mobile       String?
+  city         String?
+  state        String?
+  zipCode      String?
+  gender       String?
+  country      String?
+  email        String         @unique
+  address      String?
+  img          String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  appointments Appointments[]
+  Reviews      Reviews[]
+  Prescription Prescription[]
+  favourites   Favourites[]
+
+  @@map("Patient")
+}
+
+model Doctor {
+  id             String         @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String         @unique
+  address        String?
+  img            String?
+  phone          String?
+  gender         Gender?
+  dob            String?
+  biography      String?
+  clinicName     String?
+  clinicAddress  String?
+  clinicImages   String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?
+  price          String?
+  services       String?
+  specialization String?
+  degree         String?
+  college        String?
+  completionYear String?
+  experience     String?
+  designation    String?
+  award          String?
+  registration   String?
+  year           String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  appointments   Appointments[]
+  TimeSlot       TimeSlot[]
+  Reviews        Reviews[]
+  prescription   Prescription[]
+  favourites     Favourites[]
+
+  @@map("Doctor")
+}
+
+model Appointments {
+  id        String  @id @default(uuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  appointmentTime DateTime
+  purpose         String?
+  paidtype        PaidType?
+  status          String
+  followUp        DateTime?
+
+  totalAmount  Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  prescription Prescription[]
+
+  @@map("Appointments")
+}
+
+model TimeSlot {
+  id String @id @default(uuid())
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  start          String
+  end            String
+  day            String
+  weekDay        String
+  maximumPatient Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("TimeSlot")
+}
+
+model Reviews {
+  id String @id @default(uuid())
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  description   String
+  star          Int
+  isRecommended String
+  response      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Reviews")
+}
+
+model Prescription {
+  id String @id @default(uuid())
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  appointmentId String
+  appointment   Appointments @relation(fields: [appointmentId], references: [id])
+
+  instructions String?
+  isFullfilled Boolean @default(false)
+  isArchived   Boolean @default(false)
+  daignosis    String?
+
+  disease    String
+  bronchitis String
+
+  medicines Medicine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Prescription")
+}
+
+model Medicine {
+  id             String       @id @default(uuid())
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+
+  quantity  Int?
+  dosage    String?
+  frequency String?
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Medicine")
+}
+
+model Favourites {
+  id        String   @id @default(uuid())
+  doctorId  String   @unique
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  patientId String?
+
+  @@map("Favourites")
+}
+
+enum UserRole {
+  admin
+  patient
+  doctor
+}
+
+enum PaidType {
+  online
+  cash
+}
+
+enum Gender {
+  male
+  female
+}
